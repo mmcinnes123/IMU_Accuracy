@@ -4,7 +4,7 @@ from scipy.spatial.transform import Rotation as R
 
 input_file = "Raw_Data_from_Opti.csv"
 
-
+# Define a quaterion multiplication function
 def quaternion_multiply(Q0, Q1):
     """
     Multiplies two quaternions.
@@ -45,6 +45,7 @@ with open(input_file, 'r') as file:
     columns_OpTr = ["OpTr_Q0", "OpTr_Q1", "OpTr_Q2", "OpTr_Q3"]
     OpTr_df = pd.read_csv(file, header=10, usecols=columns_OpTr)
 
+# Apply the rotation by multipling by the quaternion rotation specified above
 N = len(IMU_df)
 transformed_quats = np.zeros((N, 4))
 
@@ -52,8 +53,9 @@ for row in range(len(IMU_df)):
     quat_i = np.array(IMU_df.values[row,:4])
     transformed_quats[row] = quaternion_multiply(rot_quat, quat_i)
 
-# Turn OpTr data frame into a numpy array
+# Turn OpTr data frame into a numpy array and combine OpTr new IMU data
 OpTr_array = OpTr_df.to_numpy()
-
 all_data = np.concatenate((transformed_quats, OpTr_array), axis=1)
+
+# Output data to a csv file
 np.savetxt('Transformed_data.csv', all_data, delimiter=',', fmt='%.6f', header="IMU_Q0,IMU_Q1,IMU_Q2,IMU_Q3,OpTr_Q0, OpTr_Q1, OpTr_Q2, OpTr_Q3", comments='')

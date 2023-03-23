@@ -5,7 +5,6 @@ from scipy.spatial.transform import Rotation as R
 input_file = "Raw_data.csv"
 
 # Define some quaternion functions
-
 def quaternion_multiply(Q0, Q1):
     """
     Multiplies two quaternions.
@@ -40,6 +39,7 @@ def quaternion_conjugate(Q0):
     output_quaternion = np.array([w0, -x0, -y0, -z0])
     return output_quaternion
 
+
 # Create two data frames from data file - IMU and OptiTrack
 with open(input_file, 'r') as file:
     columns_IMU = ["IMU_Q0", "IMU_Q1", "IMU_Q2", "IMU_Q3"]
@@ -48,9 +48,6 @@ with open(input_file, 'r') as file:
 with open(input_file, 'r') as file:
     columns_Opt = ["Opt_Q0", "Opt_Q1", "Opt_Q2", "Opt_Q3"]
     Opt_df = pd.read_csv(file, header=0, usecols=columns_Opt)
-
-quat_1 = np.array((IMU_df.values[0,:4]))
-quat_2 = np.array((IMU_df.values[0,0], IMU_df.values[1,1], IMU_df.values[1,2], IMU_df.values[1,3]))
 
 
 # Specify first quaternion as the reference orientation from which to measure all rotations
@@ -77,34 +74,11 @@ for row in range(len(Opt_df)):
 
 
 # For every rotation quaternion pair (IMU and OptiTrack), calculate the difference in orientation between these two quaternions
-
 IMU_2_Opt_rot = np.zeros((N,4))
 
 for i in range(len(Opt_rotations)):
     IMU_2_Opt_rot[i] = quaternion_multiply(quaternion_conjugate(Opt_rotations[i]), IMU_rotations[i])
 
 
-
-# r = R.from_quat(IMU_2_Opt_rot[0])
-# d = r.as_euler('xyz', degrees=True)
-# e = r.as_quat()
-# print(e)
-# print(d)
-
-print(type(IMU_2_Opt_rot))
-
+# Save output data
 np.savetxt('Output_data.csv', IMU_2_Opt_rot, delimiter=',', fmt='%.6f')
-# with open(output_file, 'w') as file:
-#     IMU_2_Opt_rot.to_csv()
-
-
-#
-# IMU_2_Opt_rot = np.array(np.quaternion(1,0,0,0))
-#
-# for i in range(len(Opt_rotations)):
-#     a = np.conjugate(Opt_rotations[i])*IMU_rotations[i]
-#     IMU_2_Opt_rot = np.append(IMU_2_Opt_rot, a)
-#
-#     # Now need to output as Euler angles
-# b = list(Opt_df.values[0,:4])
-# print(b)
