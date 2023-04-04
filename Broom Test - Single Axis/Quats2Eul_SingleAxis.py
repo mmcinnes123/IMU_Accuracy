@@ -4,7 +4,7 @@ from scipy.spatial.transform import Rotation as R
 import matplotlib.pyplot as plt
 
 ### SETTINGS:
-input_file = "Raw_data_for_quat2eul.csv"
+input_file = "Raw_data.csv"
 IMU_decomp_seq = 'zyx'
 Clus_decomp_seq = 'xzy'
 
