@@ -51,7 +51,6 @@ def full_analysis(input_file, start_time, end_time):
     trim_data = True
     plot_quats = False
     write_APDM = True
-    write_text_file = False
     plot_IMUvsClust_eulers = False
     plot_fourIMUs_eulers = False
     plot_proj_vector_angle = False
@@ -60,8 +59,6 @@ def full_analysis(input_file, start_time, end_time):
 
     # Choose global axis of interest for vector angle projection
     global_axis = "X"
-    # Choose which OMC LCF: "NewAx" "t0" or "average" or "vel" or 'local'
-    which_OMC_LCF = "local"
 
 
     ### TRANSFORM THE IMU DATA
@@ -85,28 +82,14 @@ def full_analysis(input_file, start_time, end_time):
 
     ### TRANSFORM THE CLUSTER DATA
 
-    # Calculate the neccessary velocity-based rotation vector from Cluster to IMU
+    # Calculate the quaternion rotation from Cluster to IMU based on velocity vectors.
     rot_2_apply_arr = vel_rot_quat_LCF(IMU1_df, OpTr_Clus_df_raw)
     rot_2_apply_df = pd.DataFrame(rot_2_apply_arr)
+    # Calculate the average quaternion from the array above
     rot_2_appy = average_quaternions(rot_2_apply_arr)
-    print(rot_2_apply_arr[:10])
-    print(rot_2_apply_arr.shape)
-    print(rot_2_appy)
 
-
-    # Apply the velocity-based rotation quaternion to the cluster data (based on global)
-    OpTr_Clus_df_corr = trans_clust_vel_GFC(OpTr_Clus_df_raw, rot_2_appy)
-
-    # Find the rotation quaternion from OptiTrack's cluster LCF to IMU LCF - at t = 0s
-    if which_OMC_LCF == "t0":
-        OMC_Clus_df = trans_clust_t0(OpTr_Clus_df_corr, IMU1_df)
-    elif which_OMC_LCF == "average":
-        OMC_Clus_df = trans_clust_average(OpTr_Clus_df_corr, IMU1_df)
-    elif which_OMC_LCF == "local":
-        # Apply the velocity-based rotation quaternion to the cluster data (based on local)
-        OMC_Clus_df = trans_clust_vel_LFC(OpTr_Clus_df_raw, rot_2_appy)
-    else:
-        OMC_Clus_df = NewAx_Clus_df_raw
+    # Apply the velocity-based rotation quaternion to the cluster data (based on local)
+    OMC_Clus_df = trans_clust_vel_LFC(OpTr_Clus_df_raw, rot_2_appy)
 
 
     ### WRITE DATA TO APDM FILE FORMAT
