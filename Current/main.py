@@ -32,24 +32,21 @@ from quat_functions import average_quaternions
 # and frequency set to match the recording freq (100Hz)
 
 
-print("Running " + "main as " + __name__)
-
-
 # SETTINGS
-label = "MP_F_LT"
-template_file = "APDM_template_4S.csv"
+file_label = "MP_F_LT"
+APDM_template_file = "APDM_template_4S.csv"
 sample_rate = 100
 int_decomp_seq = "YXZ"  # Intrinsic decomposition seq - used for plotting euler angles
-ext_decomp_seq = "yxz"  # Extrnisic decomposition seq - used for calculating quaternion difference
+ext_decomp_seq = "yxz"  # Extrinisic decomposition seq - used for calculating quaternion difference
 
-logging.basicConfig(filename="Results_" + label + ".log", level=logging.INFO)
+logging.basicConfig(filename="Results_" + file_label + ".log", level=logging.INFO)
 
 
 def full_analysis(input_file, start_time, end_time):
 
-
-    ### SETTINGS
     tag = input_file.replace(" - Report1.txt", "")
+    ### SETTINGS
+
     # Choose outputs
     trim_data = True
     plot_quats = False
@@ -63,11 +60,11 @@ def full_analysis(input_file, start_time, end_time):
 
     # Choose global axis of interest for vector angle projection
     global_axis = "X"
-    # Choose which OMC LCF: "NewAx" "t0" or "average" or "vel"
+    # Choose which OMC LCF: "NewAx" "t0" or "average" or "vel" or 'local'
     which_OMC_LCF = "local"
 
 
-    ### TRANSFORM THE IMU DATA, PLOT THE QUATERNIONS, AND WRITE DATA TO APDM AND TXT FILE
+    ### TRANSFORM THE IMU DATA
 
     # Read data from the file
     IMU1_df_raw, OpTr_Clus_df_raw, NewAx_Clus_df_raw = read_data_frame_from_file(input_file)
@@ -86,7 +83,7 @@ def full_analysis(input_file, start_time, end_time):
     IMU1_df = transform_IMU_data(IMU1_df_raw)
 
 
-    ### APPLY CLUSTER TRANSFORMATION
+    ### TRANSFORM THE CLUSTER DATA
 
     # Calculate the neccessary velocity-based rotation vector from Cluster to IMU
     rot_2_apply_arr = vel_rot_quat_LCF(IMU1_df, OpTr_Clus_df_raw)
@@ -112,14 +109,11 @@ def full_analysis(input_file, start_time, end_time):
         OMC_Clus_df = NewAx_Clus_df_raw
 
 
+    ### WRITE DATA TO APDM FILE FORMAT
+
     # Write the transformed IMU data (ONLY 3/4 IMUS) and original cluster data to an APDM file
     if write_APDM == True:
-        write_to_APDM(IMU1_df, rot_2_apply_df, NewAx_Clus_df_raw, OMC_Clus_df, template_file, tag)
-
-    # Plot two sets of quaternions for comparison and checking timings (set to stylus-defined cluster and IMU1)
-    if plot_quats == True:
-        plot_the_quats(IMU1_df, OMC_Clus_df, tag, sample_rate)
-
+        write_to_APDM(IMU1_df, rot_2_apply_df, NewAx_Clus_df_raw, OMC_Clus_df, APDM_template_file, tag)
 
 
     ### ANALYSE THE DATA
@@ -130,19 +124,25 @@ def full_analysis(input_file, start_time, end_time):
     # Find the single-angle quaternion-based orientation difference between an IMU and OMC LCF.
     single_angle_diff, RMSD_single_angle = find_smallest_angle(IMU1_df, OMC_Clus_df)
 
-    # Find the angle of the projected local y vector on the chosen global plane (Cluster LCF):
-    proj_vec_angle = proj_vec_angle_global_Y(OMC_Clus_df, global_axis)
-
     logging.info(input_file + ": OMC LCF used: " + which_OMC_LCF)
     logging.info(input_file + ": Angle 1 RMSD: " + str(RMSD_angle_1))
     logging.info(input_file + ": Angle 2 RMSD: " + str(RMSD_angle_2))
     logging.info(input_file + ": Angle 3 RMSD: " + str(RMSD_angle_3))
     logging.info(input_file + ": Smallest Angle RMSD: " + str(RMSD_single_angle))
 
+
+    ### PLOT RESULTS
+
+    # Find the angle of the projected local y vector on the chosen global plane (Cluster LCF):
+    proj_vec_angle = proj_vec_angle_global_Y(OMC_Clus_df, global_axis)
+
     # Calculate Euler angles from the quaternions
     IMU1_eul_1, IMU1_eul_2, IMU1_eul_3 = eulers_from_quats(IMU1_df, int_decomp_seq)
     OMC_Clus_eul_1, OMC_Clus_eul_2, OMC_Clus_eul_3 = eulers_from_quats(OMC_Clus_df, int_decomp_seq)
 
+    # Plot two sets of quaternions for comparison and checking timings (set to stylus-defined cluster and IMU1)
+    if plot_quats == True:
+        plot_the_quats(IMU1_df, OMC_Clus_df, tag, sample_rate)
 
     # Plot the Euler angles
     if plot_IMUvsClust_eulers == True:
@@ -160,40 +160,38 @@ def full_analysis(input_file, start_time, end_time):
     return RMSD_angle_1, RMSD_angle_2, RMSD_angle_3, RMSD_single_angle, proj_vec_angle, single_angle_diff
 
 
-# full_analysis(label + "_R1 - Report2.txt", start_time = 0, end_time = 30)
 
-# # Plot the quaternions to find start and end times
-# for i in [1, 2, 3, 4, 5]:
-#     file_name = label + "_R" + str(i) + " - Report2.txt"
-#     just_plot_quats(file_name)
-
+### RUN THE ANALYSIS DEFINED ABOVE
 
 # Run the analysis for each rep, returning average orientation differences
-R1_RMSD_angle_1, R1_RMSD_angle_2, R1_RMSD_angle_3, R1_RMSD_single_angle, proj_vec_angle_R1, single_angle_diff_R1 = full_analysis(label + "_R1 - Report1.txt", start_time = 0, end_time = 30)
-# R2_RMSD_angle_1, R2_RMSD_angle_2, R2_RMSD_angle_3, R2_RMSD_single_angle, proj_vec_angle_R2, single_angle_diff_R2 = full_analysis(label + "_R2 - Report1.txt", start_time = 0, end_time = 30)
-# R3_RMSD_angle_1, R3_RMSD_angle_2, R3_RMSD_angle_3, R3_RMSD_single_angle, proj_vec_angle_R3, single_angle_diff_R3 = full_analysis(label + "_R3 - Report1.txt", start_time = 0, end_time = 30)
-# #
-#
-# # Calculate the average RMSD across the five reps, and the deviation in that RMSD
-# average_RMSD_angle1 = np.mean([R1_RMSD_angle_1, R2_RMSD_angle_1, R3_RMSD_angle_1])
-# average_SD_angle1 = np.std([R1_RMSD_angle_1, R2_RMSD_angle_1, R3_RMSD_angle_1])
-# average_RMSD_angle2 = np.mean([R1_RMSD_angle_2, R2_RMSD_angle_2, R3_RMSD_angle_2])
-# average_SD_angle2 = np.std([R1_RMSD_angle_2, R2_RMSD_angle_2, R3_RMSD_angle_2])
-# average_RMSD_angle3 = np.mean([R1_RMSD_angle_3, R2_RMSD_angle_3, R3_RMSD_angle_3])
-# average_SD_angle3 = np.std([R1_RMSD_angle_3, R2_RMSD_angle_3, R3_RMSD_angle_3])
-# average_RMSD_single_angle = np.mean([R1_RMSD_single_angle, R2_RMSD_single_angle, R3_RMSD_single_angle])
-# average_SD_single_angle = np.std([R1_RMSD_single_angle, R2_RMSD_single_angle, R3_RMSD_single_angle])
-#
-# logging.info("\n Intrinsic decomp seq: " + int_decomp_seq + "\n Extrinsic decomp seq: " + ext_decomp_seq)
-# logging.info("Average Results: \n"
-#              "Average RMSE - Angle 1: " + str(round(average_RMSD_angle1, 4)) + " SD: " + str(round(average_SD_angle1, 4)) + "\n"
-#              "Average RMSE - Angle 2: " + str(round(average_RMSD_angle2, 4)) + " SD: " + str(round(average_SD_angle2, 4)) + "\n"
-#              "Average RMSE - Angle 3: " + str(round(average_RMSD_angle3, 4)) + " SD: " + str(round(average_SD_angle3, 4)) + "\n"
-#              "Average RMSE - Single-Angle: " + str(round(average_RMSD_single_angle, 4)) + " SD: " + str(round(average_SD_single_angle, 4)))
-#
-#
-# # BA plot all the data
-# BA_plot_combine_reps(proj_vec_angle_R1, single_angle_diff_R1, proj_vec_angle_R2, single_angle_diff_R2, proj_vec_angle_R3, single_angle_diff_R3, label)
+R1_RMSD_angle_1, R1_RMSD_angle_2, R1_RMSD_angle_3, R1_RMSD_single_angle, proj_vec_angle_R1, single_angle_diff_R1 = full_analysis(file_label + "_R1 - Report1.txt", start_time = 0, end_time = 30)
+R2_RMSD_angle_1, R2_RMSD_angle_2, R2_RMSD_angle_3, R2_RMSD_single_angle, proj_vec_angle_R2, single_angle_diff_R2 = full_analysis(file_label + "_R2 - Report1.txt", start_time = 0, end_time = 30)
+R3_RMSD_angle_1, R3_RMSD_angle_2, R3_RMSD_angle_3, R3_RMSD_single_angle, proj_vec_angle_R3, single_angle_diff_R3 = full_analysis(file_label + "_R3 - Report1.txt", start_time = 0, end_time = 30)
+
+
+### CALCULATE AVERAGES OVER ALL REPS
+
+# Calculate the average RMSD across the five reps, and the deviation in that RMSD
+average_RMSD_angle1 = np.mean([R1_RMSD_angle_1, R2_RMSD_angle_1, R3_RMSD_angle_1])
+average_SD_angle1 = np.std([R1_RMSD_angle_1, R2_RMSD_angle_1, R3_RMSD_angle_1])
+average_RMSD_angle2 = np.mean([R1_RMSD_angle_2, R2_RMSD_angle_2, R3_RMSD_angle_2])
+average_SD_angle2 = np.std([R1_RMSD_angle_2, R2_RMSD_angle_2, R3_RMSD_angle_2])
+average_RMSD_angle3 = np.mean([R1_RMSD_angle_3, R2_RMSD_angle_3, R3_RMSD_angle_3])
+average_SD_angle3 = np.std([R1_RMSD_angle_3, R2_RMSD_angle_3, R3_RMSD_angle_3])
+average_RMSD_single_angle = np.mean([R1_RMSD_single_angle, R2_RMSD_single_angle, R3_RMSD_single_angle])
+average_SD_single_angle = np.std([R1_RMSD_single_angle, R2_RMSD_single_angle, R3_RMSD_single_angle])
+
+logging.info("\n Intrinsic decomp seq: " + int_decomp_seq + "\n Extrinsic decomp seq: " + ext_decomp_seq)
+logging.info("Average Results: \n"
+             "Average RMSE - Angle 1: " + str(round(average_RMSD_angle1, 4)) + " SD: " + str(round(average_SD_angle1, 4)) + "\n"
+             "Average RMSE - Angle 2: " + str(round(average_RMSD_angle2, 4)) + " SD: " + str(round(average_SD_angle2, 4)) + "\n"
+             "Average RMSE - Angle 3: " + str(round(average_RMSD_angle3, 4)) + " SD: " + str(round(average_SD_angle3, 4)) + "\n"
+             "Average RMSE - Single-Angle: " + str(round(average_RMSD_single_angle, 4)) + " SD: " + str(round(average_SD_single_angle, 4)))
+
+
+### BA PLOT ALL DATA COMBINED
+
+BA_plot_combine_reps(proj_vec_angle_R1, single_angle_diff_R1, proj_vec_angle_R2, single_angle_diff_R2, proj_vec_angle_R3, single_angle_diff_R3, file_label)
 
 
 
