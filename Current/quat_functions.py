@@ -1,5 +1,9 @@
+### Functions for application to quaternions
+
 import numpy as np
 
+
+# Find average quaternion from an array of quaternions. Note: be aware of different quaternion averaging methods
 def average_quaternions(quaternions):
     """
     Calculate average quaternion
@@ -32,13 +36,13 @@ def average_quaternions(quaternions):
     return np.real(np.ravel(eigen_vectors[:, 0]))
 
 
+# Calculate angular velocity vectors from quaternion data
 def ang_vel_from_quats(q1, q2, dt):
     vel = (2 / dt) * np.array([
         q1[0]*q2[1] - q1[1]*q2[0] - q1[2]*q2[3] + q1[3]*q2[2],
         q1[0]*q2[2] + q1[1]*q2[3] - q1[2]*q2[0] - q1[3]*q2[1],
         q1[0]*q2[3] - q1[1]*q2[2] + q1[2]*q2[1] - q1[3]*q2[0]])
-    vel_norm = vel / np.linalg.norm(vel)
-    return vel_norm
+    return vel
 
 
 # Define a function for quaternion multiplication

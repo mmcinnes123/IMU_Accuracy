@@ -4,15 +4,15 @@
 		<!--List of Experimental sensors and desired associated column labels in resulting tables-->
 		<ExperimentalSensors>
 			<ExperimentalSensor name="Upper">
-				<!--The name of the PhysicalFrame representing a sensor (IMU) in Model.When loading sensor data, it will be used as a table column label.-->
+				<!--The name of the PhysicalFrame representing a sensor (IMU) in Model.When loading sensor data, it will be used as a table column file_label.-->
 				<name_in_model>IMU</name_in_model>
 			</ExperimentalSensor>
 			<ExperimentalSensor name="Middle">
-				<!--The name of the PhysicalFrame representing a sensor (IMU) in Model.When loading sensor data, it will be used as a table column label.-->
+				<!--The name of the PhysicalFrame representing a sensor (IMU) in Model.When loading sensor data, it will be used as a table column file_label.-->
 				<name_in_model>Clust_OptiTrack</name_in_model>
 			</ExperimentalSensor>
 			<ExperimentalSensor name="Lower">
-				<!--The name of the PhysicalFrame representing a sensor (IMU) in Model.When loading sensor data, it will be used as a table column label.-->
+				<!--The name of the PhysicalFrame representing a sensor (IMU) in Model.When loading sensor data, it will be used as a table column file_label.-->
 				<name_in_model>Clust_StylusLCF</name_in_model>
 			</ExperimentalSensor>			
 		</ExperimentalSensors>

@@ -1,16 +1,50 @@
+### Functions used to analyse the data
+
 import pandas as pd
-
-print("Running " + "analysis.py as " + __name__)
-
 import numpy as np
 from scipy.spatial.transform import Rotation as R
 import matplotlib.pyplot as plt
-from quat_functions import quaternion_multiply
-from quat_functions import quaternion_conjugate
+from quat_functions import *
 
 
+# Plot the quaternions for comparison and checking timings
+def plot_the_quats(IMU1_df, NewAx_Clus_df, tag, sample_rate):
+    # Turn data frames into numpy arrays
+    NewAx_Clus_array = NewAx_Clus_df.to_numpy(na_value="nan")
+    IMU1_array = IMU1_df.to_numpy(na_value="nan")
+    time = list(np.arange(0, len(NewAx_Clus_df) / sample_rate, 1 / sample_rate))
+    if len(time) != len(NewAx_Clus_array):
+        del time[-1]
+    plt.figure(1)
+    y1 = NewAx_Clus_array[:,0]
+    y2 = NewAx_Clus_array[:,1]
+    y3 = NewAx_Clus_array[:,2]
+    y4 = NewAx_Clus_array[:,3]
+    y5 = IMU1_array[:,0]
+    y6 = IMU1_array[:,1]
+    y7 = IMU1_array[:,2]
+    y8 = IMU1_array[:,3]
+    plt.scatter(time, y1, s=3, c='orange')
+    plt.scatter(time, y2, s=3, c='fuchsia')
+    plt.scatter(time, y3, s=3, c='red')
+    plt.scatter(time, y4, s=3, c='maroon')
+    plt.scatter(time, y5, s=3, c='blue')
+    plt.scatter(time, y6, s=3, c='green')
+    plt.scatter(time, y7, s=3, c='teal')
+    plt.scatter(time, y8, s=3, c='darkgreen')
+    plt.rcParams.update({'figure.figsize': (10, 8), 'figure.dpi': 100})
+    plt.title("Cluster and IMU2 Quaternions")
+    plt.xlabel('Time')
+    plt.ylabel('Quats')
+    plt.grid(axis="x", which="both")
+    x_range = round(len(time)/sample_rate)
+    plt.xticks(range(0, x_range, 1))
+    plt.legend(["Clus_Q0", "Clust_Q1", "Clust_Q2", "Clust_Q3", "IMU_Q0", "IMU_Q1", "IMU_Q2", "IMU_Q3"], loc="lower right")
+    plt.savefig("RefQuats_" + tag + ".png")
+    plt.clf()
 
-# Find quatenrion-based difference in orientation between one IMU and a cluster
+
+# Find quaternion-based difference in orientation between one IMU and a cluster
 def find_quat_diff(IMU_df, Clust_df, decomp_seq):
     # For every time sample in the data frame, calculate the rotational difference between the IMU and the cluster, then decompose into Euler angles
     N = len(IMU_df)
@@ -231,7 +265,6 @@ def BA_plot(proj_vec_angle, diff_angle_1, tag):
     plt.clf()
 
 
-
 # Do a BA plot with the euler angles. X-axis is cluster euler angle, Y-axis is difference. Can be Angle 1, 2 or 3
 def BA_plot_eulers(IMU_Eul, Clust_Eul, which_angle, tag):
     eul_diff = []
@@ -258,7 +291,6 @@ def vec_angle_vel(proj_vec_angle, sample_rate):
         ang_vel.append(sample_rate * (proj_vec_angle[i+1] - proj_vec_angle[i]))
     ang_vel.append(ang_vel[-1])
     return ang_vel
-
 
 
 def BA_plot_combine_reps(angle_R1, diff_R1, angle_R2, diff_R2, angle_R3, diff_R3, label):
