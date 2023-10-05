@@ -1,0 +1,19 @@
+INFO:root:RUNNING FILE: C:\Users\r03mm22\Documents\IMU Accuracy\Final Work - Code\Final Processing\Test Folder\main_f.py
+INFO:root:Movement Type: CON_MP
+INFO:root:Average Results: 
+(Decomp seq: yxz)
+Average RMSE - Angle 1: 0.68 SD: 0.16
+Average RMSE - Angle 2: 0.14 SD: 0.02
+Average RMSE - Angle 3: 0.13 SD: 0.01
+Average RMSE - Angles 2 and 3: 0.14 SD: 0.01
+Average RMSE - Angular Distance: 0.72 SD: 0.16
+
+INFO:root:Movement Type: CON_SP
+INFO:root:Average Results: 
+(Decomp seq: yxz)
+Average RMSE - Angle 1: 0.96 SD: 0.24
+Average RMSE - Angle 2: 0.09 SD: 0.01
+Average RMSE - Angle 3: 0.08 SD: 0.02
+Average RMSE - Angles 2 and 3: 0.08 SD: 0.02
+Average RMSE - Angular Distance: 0.97 SD: 0.24
+

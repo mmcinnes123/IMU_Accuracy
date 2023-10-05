@@ -1,0 +1,53 @@
+INFO:root:RUNNING FILE: C:\Users\r03mm22\Documents\IMU Accuracy\Final Work - Code\Final Processing\Test Folder\main_c.py
+INFO:root:GCF alignment quaternion: [-9.471e-01 -4.000e-04  3.209e-01  3.200e-03]
+INFO:root:CON_MP_R1
+INFO:root:No of missing samples: 0
+INFO:root:CON_MP_R2
+INFO:root:No of missing samples: 0
+INFO:root:CON_MP_R3
+INFO:root:No of missing samples: 0
+INFO:root:CON_MP_R4
+INFO:root:No of missing samples: 0
+INFO:root:CON_MP_R5
+INFO:root:No of missing samples: 0
+INFO:root:CON_HO_R1
+INFO:root:No of missing samples: 0
+INFO:root:CON_HO_R2
+INFO:root:No of missing samples: 0
+INFO:root:CON_HO_R3
+INFO:root:No of missing samples: 0
+INFO:root:CON_HO_R4
+INFO:root:No of missing samples: 0
+INFO:root:CON_HO_R5
+INFO:root:No of missing samples: 0
+INFO:root:CON_VE_R1
+INFO:root:No of missing samples: 0
+INFO:root:CON_VE_R2
+INFO:root:No of missing samples: 0
+INFO:root:CON_VE_R3
+INFO:root:No of missing samples: 0
+INFO:root:CON_VE_R4
+INFO:root:No of missing samples: 0
+INFO:root:CON_VE_R5
+INFO:root:No of missing samples: 0
+INFO:root:CON_SP_R1
+INFO:root:No of missing samples: 0
+INFO:root:CON_SP_R2
+INFO:root:No of missing samples: 0
+INFO:root:CON_SP_R3
+INFO:root:No of missing samples: 0
+INFO:root:FUN_R1
+INFO:root:No of missing IMU samples: 0
+INFO:root:No of missing OMC samples: 0
+INFO:root:FUN_R2
+INFO:root:No of missing IMU samples: 0
+INFO:root:No of missing OMC samples: 0
+INFO:root:FUN_R3
+INFO:root:No of missing IMU samples: 0
+INFO:root:No of missing OMC samples: 0
+INFO:root:FUN_R4
+INFO:root:No of missing IMU samples: 0
+INFO:root:No of missing OMC samples: 0
+INFO:root:FUN_R5
+INFO:root:No of missing IMU samples: 0
+INFO:root:No of missing OMC samples: 0

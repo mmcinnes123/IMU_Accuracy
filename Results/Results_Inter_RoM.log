@@ -1,0 +1,10 @@
+INFO:root:RUNNING FILE: C:\Users\r03mm22\Documents\IMU Accuracy\Final Work - Code\Final Processing\Test Folder\main_g.py
+INFO:root:Int Decomp Sequence: YZX
+INFO:root:Movement Type: CON_HO
+INFO:root:
+Average RoM RMSD: 1.37
+Average RoM SD: 0.44
+INFO:root:Movement Type: CON_VE
+INFO:root:
+Average RoM RMSD: 0.1
+Average RoM SD: 0.01

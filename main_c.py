@@ -1,118 +1,208 @@
-# This script is used to analyse absolute RMSE results from CON_MP and CON_SP and FUN data
+# This script runs the required pre-processing steps to all the raw data
+# Inputs are all the raw data files
+# Outputs are .csv files for every rep of all CON and FUN data
+    # A file is created for all CON data used for absolute accuracy analysis
+    # A file is created for all CON data used for inter-IMU agreement analysis
+    # A seperate Torso, Upper, and Forearm file is created for all FUN data used for absolute accuracy analysis
+    # A seperate Torso, Upper, and Forearm file is created for all FUN data used for joint angle analysis
+
 
 import logging
-from analysis import *
+from pre_process import *
+import os
 
-
-logging.basicConfig(filename="Results_Abs.log", level=logging.INFO)
+logging.basicConfig(filename="Results_PreProcess.log", level=logging.INFO)
 logging.info("RUNNING FILE: " + str(__file__))
 
-# SETTINGS
-sample_rate = 100
-ext_decomp_seq = "yxz"  # Extrinsic decomposition seq - used for calculating angular distance
-
-### ABSOLUTE ACCURACY TESTS
-
-def trim_data(input_file, label, start_time, end_time):
-
-    IMU_df, OMC_df = read_abs_pre_processed_data_from_file(input_file)
-
-    # Trim the data based on start and end time
-    IMU_df = trim_df(IMU_df, start_time, end_time, sample_rate)
-    OMC_df = trim_df(OMC_df, start_time, end_time, sample_rate)
-
-    if label == "CON_SP":
-        # Trim the data so that only the static sections are analysed
-        s1 = 12.5
-        e1 = 27.5
-        s2 = 42.5
-        e2 = 57.5
-        s3 = 72.5
-        e3 = 87.5
-        s4 = 102.5
-        e4 = 117.5
-        IMU_df = cut_four_sections(IMU_df, s1, e1, s2, e2, s3, e3, s4, e4, sample_rate)
-        OMC_df = cut_four_sections(OMC_df, s1, e1, s2, e2, s3, e3, s4, e4, sample_rate)
-
-    return IMU_df, OMC_df
+# Make a folder to store the processed data
+new_folder_name = 'ProcessedData'
+os.makedirs(new_folder_name, exist_ok=True)
 
 
-def find_abs_error_CON(IMU_df, OMC_df):
+### DEFINE GLOBAL AND LOCAL MISALIGNMENT QUATERNIONS
 
-    # Find the 3-angle quaternion-based orientation difference between an IMU and OMC LCF.
-    RMSD_angle_1, RMSD_angle_2, RMSD_angle_3 = find_quat_diff(IMU_df, OMC_df, ext_decomp_seq)[3:6]
+# Use GCF alignment quaternion calculated in main_a.py
+GCF_alignment_quat = np.array([-9.47112458e-01, -4.33103184e-04, 3.20885659e-01, 3.19327766e-03])
+logging.info("GCF alignment quaternion: " + str(np.around(GCF_alignment_quat, 4)))
 
-    # Find the single-angle quaternion-based orientation difference between an IMU and OMC LCF.
-    ang_dist, RMSD_ang_dist = find_ang_dist(IMU_df, OMC_df)
-
-    # Find correlation of IMU error with time
-    corr_coeff = find_corr_coef(ang_dist)
-
-    return RMSD_angle_1, RMSD_angle_2, RMSD_angle_3, RMSD_ang_dist, ang_dist, corr_coeff
-
-
-def combine_reps_CON_MP_SP_FUN(label, no_reps, start_time, end_time):
-
-    # Initiate arrays to hold a single value for each rep
-    angle_1_RMSDs = np.zeros((no_reps))
-    angle_2_RMSDs = np.zeros((no_reps))
-    angle_3_RMSDs = np.zeros((no_reps))
-    ang_dist_RMSDs = np.zeros((no_reps))
-    corr_coeffs = np.zeros((no_reps))
-
-    for i in range(1, no_reps+1):
-
-        file_name = label + "_R" + str(i) + ".csv"
-
-        # Trim the data down to sections of interest
-        IMU_df, OMC_df = trim_data(file_name, label, start_time, end_time)
-
-        # Calculate the time-series RMSD and correlation coefficient in every rep
-        RMSD_angle_1, RMSD_angle_2, RMSD_angle_3, RMSD_ang_dist, ang_dist, corr_coeff = find_abs_error_CON(IMU_df,
-                                                                                                           OMC_df)
-        # Add the value from each rep to the arrays
-        angle_1_RMSDs[i-1] = RMSD_angle_1
-        angle_2_RMSDs[i-1] = RMSD_angle_2
-        angle_3_RMSDs[i-1] = RMSD_angle_3
-        ang_dist_RMSDs[i-1] = RMSD_ang_dist
-        corr_coeffs[i-1] = corr_coeff
-
-    # Calculate the average RMSD across the five reps, and the standard deviation in that RMSD
-    angle_1_RMSD_average = np.mean(angle_1_RMSDs)
-    angle_1_RMSD_SD = np.std(angle_1_RMSDs)
-    angle_2_RMSD_average = np.mean(angle_2_RMSDs)
-    angle_2_RMSD_SD = np.std(angle_2_RMSDs)
-    angle_3_RMSD_average = np.mean(angle_3_RMSDs)
-    angle_3_RMSD_SD = np.std(angle_3_RMSDs)
-    ang_dist_RMSD_average = np.mean(ang_dist_RMSDs)
-    ang_dist_RMSD_SD = np.std(ang_dist_RMSDs)
-
-    # Take an average of the vertical planes (i.e. euler angle 2 and 3 (in the YXZ decomposition sequence))
-    angle_2_and_3_RMSD_average = np.mean(np.concatenate([angle_2_RMSDs, angle_3_RMSDs]))
-    angle_2_and_3_RMSD_SD = np.std(np.concatenate([angle_2_RMSDs, angle_3_RMSDs]))
-
-    # Calculate the average correlation coefficient across all reps
-    corr_coeff_average = np.mean(corr_coeffs)
-    corr_coeff_SD = np.std(corr_coeffs)
-
-    # Log the result
-    logging.info("Movement Type: " + label)
-    logging.info("Average Results: \n"
-                 "(Decomp seq: " + ext_decomp_seq + ")\n"
-                 "Average RMSE - Angle 1: " + str(np.around(angle_1_RMSD_average, 2)) + " SD: " + str(np.around(angle_1_RMSD_SD, 2)) + "\n"
-                 "Average RMSE - Angle 2: " + str(np.around(angle_2_RMSD_average, 2)) + " SD: " + str(np.around(angle_2_RMSD_SD, 2)) + "\n"
-                 "Average RMSE - Angle 3: " + str(np.around(angle_3_RMSD_average, 2)) + " SD: " + str(np.around(angle_3_RMSD_SD, 2)) + "\n"
-                 "Average RMSE - Angles 2 and 3: " + str(np.around(angle_2_and_3_RMSD_average, 2)) + " SD: " + str(np.around(angle_2_and_3_RMSD_SD, 2)) + "\n"
-                 "Average RMSE - Angular Distance: " + str(np.around(ang_dist_RMSD_average, 2)) + " SD: " + str(np.around(ang_dist_RMSD_SD, 2)) + "\n"
-                 "Average Correlation Coefficient (AngDist vs Time): " + str(np.around(corr_coeff_average, 2)) + " SD:" + str(np.around(corr_coeff_SD, 2)))
+# Use LCF alignment quaternions calculated in main_b.py
+LCF_alignment_quat_CON = [0.99875798, -0.01179207,  0.00978239,  0.04741044]
+LCF_alignment_quat_IMU2 = [0.99996261, -0.0082542,  -0.00130569,  0.00222294]
+LCF_alignment_quat_IMU3 = [9.99919007e-01, -1.25052029e-02, -2.17818831e-03,  9.24452645e-04]
+LCF_alignment_quat_IMU4 = [9.99881404e-01, -7.31607851e-03, -1.35508240e-02,  1.66177452e-04]
+LCF_alignment_quat_T = [-0.99663601,  0.00436451, -0.0661548,  -0.04817834]
+LCF_alignment_quat_U = [0.998934,   0.01345973, 0.02845089, 0.03376764]
+LCF_alignment_quat_F = [0.99850962,  0.02547898, -0.00221886,  0.04821239]
 
 
 
-### APPLY FUNCTIONS DEFINED ABOVE TO FIND AVERAGE RMSE FOR ALL REPS
+### DEFINE FUNCTIONS FOR PRE-PROCESSING ALL DATA
 
-combine_reps_CON_MP_SP_FUN(label="CON_MP", no_reps=5, start_time=0, end_time=30)
-combine_reps_CON_MP_SP_FUN(label="CON_SP", no_reps=3, start_time=0, end_time=120)
+# Define a function for CON data
+def pre_process_CON_data(input_file):
 
-combine_reps_CON_MP_SP_FUN(label="Torso_FUN", no_reps=5, start_time=0, end_time=30)
-combine_reps_CON_MP_SP_FUN(label="Upper_FUN", no_reps=5, start_time=0, end_time=30)
-combine_reps_CON_MP_SP_FUN(label="Forearm_FUN", no_reps=5, start_time=0, end_time=30)
+    tag = input_file.replace(" - Report2.txt", "")
+
+    # Read data from the file
+    IMU1_df_raw, IMU2_df_raw, IMU3_df_raw, IMU4_df_raw, OpTr_Clus_df_raw, NewAx_Clus_df_raw = read_data_frame_from_file((input_file))
+
+    # Interpolate for missing data
+    IMU1_df, IMU1_nan_count = interpolate_df(IMU1_df_raw)
+    IMU2_df, IMU2_nan_count = interpolate_df(IMU2_df_raw)
+    IMU3_df, IMU3_nan_count = interpolate_df(IMU3_df_raw)
+    IMU4_df, IMU4_nan_count = interpolate_df(IMU4_df_raw)
+    OMC_df, OMC_nan_count = interpolate_df(NewAx_Clus_df_raw)
+    total_nans = IMU1_nan_count + IMU2_nan_count + IMU3_nan_count + IMU4_nan_count + OMC_nan_count
+
+    # Do initial transform of IMU data to match OptiTrack Y-up convention
+    IMU1_df = intial_IMU_transform(IMU1_df)
+    IMU2_df = intial_IMU_transform(IMU2_df)
+    IMU3_df = intial_IMU_transform(IMU3_df)
+    IMU4_df = intial_IMU_transform(IMU4_df)
+
+    # Apply LCF alignment quaternions to align each IMU with IMU1
+    IMU1_df_aligned = IMU1_df
+    IMU2_df_aligned = apply_LCF_to_IMU(IMU2_df, LCF_alignment_quat_IMU2)
+    IMU3_df_aligned = apply_LCF_to_IMU(IMU3_df, LCF_alignment_quat_IMU3)
+    IMU4_df_aligned = apply_LCF_to_IMU(IMU4_df, LCF_alignment_quat_IMU4)
+
+    # Write IMU data to new file for Inter-IMU processing
+    all_IMUs_df = pd.concat([IMU1_df_aligned, IMU2_df_aligned, IMU3_df_aligned, IMU4_df_aligned], axis=1)
+    all_IMUs_df.columns = ["IMU1_Q0", "IMU1_Q1", "IMU1_Q2", "IMU1_Q3", "IMU2_Q0", "IMU2_Q1", "IMU2_Q2", "IMU2_Q3",
+                           "IMU3_Q0", "IMU3_Q1", "IMU3_Q2", "IMU3_Q3", "IMU4_Q0", "IMU4_Q1", "IMU4_Q2", "IMU4_Q3"]
+    all_IMUs_df.to_csv(new_folder_name + "/Inter_" + tag + ".csv", header=True, index=True)
+
+    ### Apply transformations to one IMU for absolute comparison with OMC
+
+    # Work with IMU2 since this one was used for stylus-based LCF definition
+    IMU_df = IMU2_df
+
+    # Apply the calculated rot_quat LCF and GCF to the IMU data
+    IMU_df = apply_LCF_and_GCF_to_IMU(IMU_df, GCF_alignment_quat, LCF_alignment_quat_CON)
+
+    # Write the IMU and OMC data to a new file for Absolute Accuracy processing
+    IMU_and_OMC_df = pd.concat([IMU_df, OMC_df], axis=1)
+    IMU_and_OMC_df.columns = ["IMU_Q0", "IMU_Q1", "IMU_Q2", "IMU_Q3", "OMC_Q0", "OMC_Q1", "OMC_Q2", "OMC_Q3"]
+    IMU_and_OMC_df.to_csv(new_folder_name + "/" + tag + ".csv", header=True, index=True)
+
+    logging.info(str(tag))
+    logging.info("No of missing samples: " + str(total_nans))
+
+
+# Define a function for FUN data
+def pre_process_FUN_data(input_file):
+
+    tag = input_file.replace(" - Report2.txt", "")
+
+    ### READ DATA IN
+
+    # Read data from the file
+    IMU_T_df_raw, IMU_U_df_raw, IMU_F_df_raw, OpTr_T_Clus_df, NewAx_T_Clus_df, OpTr_U_Clus_df, NewAx_U_Clus_df, OpTr_F_Clus_df, NewAx_F_Clus_df \
+        = read_data_frame_from_file_FUN((input_file))
+
+    ### APPLY INITIAL CHANGES
+
+    # Interpolate for missing data
+    IMU_T_df, IMU_T_nan_count = interpolate_df(IMU_T_df_raw)
+    IMU_U_df, IMU_U_nan_count = interpolate_df(IMU_U_df_raw)
+    IMU_F_df, IMU_F_nan_count = interpolate_df(IMU_F_df_raw)
+    OMC_T_df, OMC_T_nan_count = interpolate_df(NewAx_T_Clus_df)
+    OMC_U_df, OMC_U_nan_count = interpolate_df(NewAx_U_Clus_df)
+    OMC_F_df, OMC_F_nan_count = interpolate_df(NewAx_F_Clus_df)
+    total_IMU_nans = IMU_T_nan_count + IMU_U_nan_count + IMU_F_nan_count
+    total_OMC_nans = OMC_T_nan_count + OMC_U_nan_count + OMC_F_nan_count
+
+    # Do initial transform of IMU data to match OptiTrack Y-up convention
+    IMU_T_df = intial_IMU_transform(IMU_T_df)
+    IMU_U_df = intial_IMU_transform(IMU_U_df)
+    IMU_F_df = intial_IMU_transform(IMU_F_df)
+
+    ### WRITE TO NEW FILE FOR JOINT ANGLE ANALYSIS
+
+    # Write the Torso IMU and OMC data to a new file for further processing
+    new_header_list = ["IMU_Q0", "IMU_Q1", "IMU_Q2", "IMU_Q3", "OMC_Q0", "OMC_Q1", "OMC_Q2", "OMC_Q3"]
+    IMU_and_OMC_T_df = pd.concat([IMU_T_df, OMC_T_df], axis=1)
+    IMU_and_OMC_T_df.columns = new_header_list
+    IMU_and_OMC_T_df.to_csv(new_folder_name + "/" + "JA_Torso_" + tag + ".csv", header=True, index=True)
+
+    # Write the Upper arm IMU and OMC data to a new file for further processing
+    IMU_and_OMC_U_df = pd.concat([IMU_U_df, OMC_U_df], axis=1)
+    IMU_and_OMC_U_df.columns = new_header_list
+    IMU_and_OMC_U_df.to_csv(new_folder_name + "/" + "JA_Upper_" + tag + ".csv", header=True, index=True)
+
+    # Write the Forearm arm IMU and OMC data to a new file for further processing
+    IMU_and_OMC_F_df = pd.concat([IMU_F_df, OMC_F_df], axis=1)
+    IMU_and_OMC_F_df.columns = new_header_list
+    IMU_and_OMC_F_df.to_csv(new_folder_name + "/" + "JA_Forearm_" + tag + ".csv", header=True, index=True)
+
+    ### ALIGN IMU FRAME WITH OMC FOR ABSOLUTE ACCURACY ANALYSIS
+
+    # Apply the calculated rot_quat LCF and GCF to the IMU data
+    IMU_T_df = apply_LCF_and_GCF_to_IMU(IMU_T_df, GCF_alignment_quat, LCF_alignment_quat_T)
+    IMU_U_df = apply_LCF_and_GCF_to_IMU(IMU_U_df, GCF_alignment_quat, LCF_alignment_quat_U)
+    IMU_F_df = apply_LCF_and_GCF_to_IMU(IMU_F_df, GCF_alignment_quat, LCF_alignment_quat_F)
+
+    ### WRITE TO NEW FILE FOR ABSOLUTE ACCURACY ANALYSIS
+
+    # Write the Torso IMU and OMC data to a new file for further processing
+    new_header_list = ["IMU_Q0", "IMU_Q1", "IMU_Q2", "IMU_Q3", "OMC_Q0", "OMC_Q1", "OMC_Q2", "OMC_Q3"]
+    IMU_and_OMC_T_df = pd.concat([IMU_T_df, OMC_T_df], axis=1)
+    IMU_and_OMC_T_df.columns = new_header_list
+    IMU_and_OMC_T_df.to_csv(new_folder_name + "/" + "Torso_" + tag + ".csv", header=True, index=True)
+
+    # Write the Upper arm IMU and OMC data to a new file for further processing
+    IMU_and_OMC_U_df = pd.concat([IMU_U_df, OMC_U_df], axis=1)
+    IMU_and_OMC_U_df.columns = new_header_list
+    IMU_and_OMC_U_df.to_csv(new_folder_name + "/" + "Upper_" + tag + ".csv", header=True, index=True)
+
+    # Write the Forearm arm IMU and OMC data to a new file for further processing
+    IMU_and_OMC_F_df = pd.concat([IMU_F_df, OMC_F_df], axis=1)
+    IMU_and_OMC_F_df.columns = new_header_list
+    IMU_and_OMC_F_df.to_csv(new_folder_name + "/" + "Forearm_" + tag + ".csv", header=True, index=True)
+
+    logging.info(str(tag))
+    logging.info("No of missing IMU samples: " + str(total_IMU_nans))
+    logging.info("No of missing OMC samples: " + str(total_OMC_nans))
+
+
+
+### RUN FUNCTION FOR ALL REPS OF CON DATA
+
+# 5 reps of multi-plane, horizontal RoM, and vertical RoM movements
+list_of_labels = ["CON_MP", "CON_HO", "CON_VE"]
+for label in list_of_labels:
+    for i in range(1,6):
+        file_name = label + "_R" + str(i) + " - Report2.txt"
+        pre_process_CON_data(file_name)
+# 3 reps of the static placements
+for i in range(1,4):
+    file_name = "CON_SP" + "_R" + str(i) + " - Report2.txt"
+    pre_process_CON_data(file_name)
+
+
+
+## RUN FUNCTION FOR ALL REPS OF FUN DATA
+
+# 5 reps of the functional upper-limb movements
+for i in range(1,6,1):
+    file_name = "FUN_R" + str(i) + " - Report2.txt"
+    pre_process_FUN_data(file_name)
+
+
+
+### ADDITIONAL FUNCTION: FOR VISUALISATION
+
+# This code can be added in if any data needs to be visualised
+# The code writes the quaternions into a template file which can be read into OpenSim
+# Make sure APDM template file template is in same folder, with numbers as first row
+
+    # if write_to_APDM == True:
+    #     APDM_template_file = "APDM_template_4S.csv"
+    #     write_to_APDM(df_1, df_2, df_3, df_4, APDM_template_file, tag)
+
+# Once data has been written to file, use these commands in terminal, using an environment with OpenSim installed:
+
+# opensense -ReadAPDM APDM_template_4S.csv APDM_Settings_4S.xml
+# (Make sure APDM Settings file is in same folder)
+
+# Use 'Preview Sensor Data' option in OpenSim GUI to visualise the movement

@@ -1,0 +1,16 @@
+INFO:root:RUNNING FILE: C:\Users\r03mm22\Documents\IMU Accuracy\Final Work - Code\Final Processing\Test Folder\main_b.py
+INFO:root:GCF alignment quaternion: [-9.471e-01 -4.000e-04  3.209e-01  3.200e-03]
+INFO:root:CON LCF Alignment Quaternion: 
+INFO:root:[ 0.99875798 -0.01179207  0.00978239  0.04741044]
+INFO:root:IMU2 to IMU1 LCF Alignment Quaternion: 
+INFO:root:[ 0.99996261 -0.0082542  -0.00130569  0.00222294]
+INFO:root:IMU3 to IMU1 LCF Alignment Quaternion: 
+INFO:root:[ 9.99919007e-01 -1.25052029e-02 -2.17818831e-03  9.24452645e-04]
+INFO:root:IMU4 to IMU1 LCF Alignment Quaternion: 
+INFO:root:[ 9.99881404e-01 -7.31607851e-03 -1.35508240e-02  1.66177452e-04]
+INFO:root:Torso LCF Alignment Quaternion: 
+INFO:root:[-0.99663601  0.00436451 -0.0661548  -0.04817834]
+INFO:root:Upper LCF Alignment Quaternion: 
+INFO:root:[0.998934   0.01345973 0.02845089 0.03376764]
+INFO:root:Forearm LCF Alignment Quaternion: 
+INFO:root:[ 0.99850962  0.02547898 -0.00221886  0.04821239]

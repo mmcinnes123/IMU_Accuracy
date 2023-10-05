@@ -1,0 +1,10 @@
+INFO:root:RUNNING FILE: C:\Users\r03mm22\Documents\IMU Accuracy\Final Work - Code\Final Processing\Test Folder\main_h.py
+INFO:root:Movement Type: FUN
+INFO:root:Average ELBOW Results: 
+Average RMSE - Angle 1: 4.86 SD: 0.43
+Average RMSE - Angle 2: 3.99 SD: 0.38
+Average RMSE - Angle 3: 3.75 SD: 0.29
+INFO:root:Average SHOULDER Results: 
+Average RMSE - Angle 1: 6.07 SD: 0.86
+Average RMSE - Angle 2: 4.12 SD: 0.29
+Average RMSE - Angle 3: 7.54 SD: 0.83

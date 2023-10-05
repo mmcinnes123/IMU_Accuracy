@@ -36,7 +36,7 @@ def average_quaternions(quaternions):
     return np.real(np.ravel(eigen_vectors[:, 0]))
 
 
-
+# Find average quaternion from an array of quaternions, based on different averaging technique. Note: be aware of different quaternion averaging methods
 def average_quats_Gramkow(quaternions):
     '''
     This quaternion averaging method, from Gramkow, 2001,
@@ -52,6 +52,7 @@ def average_quats_Gramkow(quaternions):
     quat_avg = [quat0, quat1, quat2, quat3]
     quat_avg_norm = quat_avg / np.linalg.norm(quat_avg)
     return quat_avg_norm
+
 
 # Calculate angular velocity vectors from quaternion data
 def ang_vel_from_quats(q1, q2, dt):
@@ -88,6 +89,29 @@ def quat_mul(Q0, Q1):
     # Create a 4 element array containing the final quaternion
     final_quaternion = np.array([Q0Q1_w, Q0Q1_x, Q0Q1_y, Q0Q1_z])
     return final_quaternion
+
+
+# Find dot product of two quaternions
+def quat_dot_prod(Q0, Q1):
+    """
+    Multiplies two quaternions by dot product.
+    Input
+    :param Q0: A 4 element array containing the first quaternion (q01,q11,q21,q31)
+    :param Q1: A 4 element array containing the second quaternion (q02,q12,q22,q32)
+    """
+
+    w0 = Q0[0]
+    x0 = Q0[1]
+    y0 = Q0[2]
+    z0 = Q0[3]
+    w1 = Q1[0]
+    x1 = Q1[1]
+    y1 = Q1[2]
+    z1 = Q1[3]
+
+    prod = w0*w1 + x0*x1 + y0*y1 + z0*z1
+
+    return prod
 
 
 # Calculate quaternion conjugate

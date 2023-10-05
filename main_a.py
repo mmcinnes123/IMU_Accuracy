@@ -1,6 +1,6 @@
 # This script finds the global misalignment between the IMU and OMC system
 # The output is an alignment quaternion which can be applied to all IMU data in further processing
-# The input is multiple types of movement data
+# The inputs are multiple types of movement data
 
 import logging
 from pre_process import *
@@ -91,3 +91,5 @@ GCF_alignment_quat = average_quaternions(GCF_rot_quats)
 
 logging.info("GCF Alignment Quaternion: ")
 logging.info(GCF_alignment_quat)
+
+

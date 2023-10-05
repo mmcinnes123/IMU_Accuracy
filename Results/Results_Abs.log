@@ -1,0 +1,140 @@
+INFO:root:RUNNING FILE: C:\Users\r03mm22\Documents\IMU Accuracy\Final Work - Code\Final Processing\Test Folder\main_d.py
+INFO:root:RUNNING FILE: C:\Users\r03mm22\Documents\IMU Accuracy\Final Work - Code\Final Processing\Test Folder\main_d.py
+INFO:root:RUNNING FILE: C:\Users\r03mm22\Documents\IMU Accuracy\Final Work - Code\Final Processing\Test Folder\main_d.py
+INFO:root:RUNNING FILE: C:\Users\r03mm22\Documents\IMU Accuracy\Final Work - Code\Final Processing\Test Folder\main_d.py
+INFO:root:RUNNING FILE: C:\Users\r03mm22\Documents\IMU Accuracy\Final Work - Code\Final Processing\Test Folder\main_d.py
+INFO:root:RUNNING FILE: C:\Users\r03mm22\Documents\IMU Accuracy\Final Work - Code\Final Processing\Test Folder\main_d.py
+INFO:root:RUNNING FILE: C:\Users\r03mm22\Documents\IMU Accuracy\Final Work - Code\Final Processing\Test Folder\main_d.py
+INFO:root:RUNNING FILE: C:\Users\r03mm22\Documents\IMU Accuracy\Final Work - Code\Final Processing\Test Folder\main_d.py
+INFO:root:RUNNING FILE: C:\Users\r03mm22\Documents\IMU Accuracy\Final Work - Code\Final Processing\Test Folder\main_d.py
+INFO:root:Movement Type: CON_MP
+INFO:root:Time interval: 0-30s
+INFO:root:Average Results: 
+(Decomp seq: yxz)
+Average RMSE - Angle 1: 4.57 SD: 0.54
+Average RMSE - Angle 2: 2.83 SD: 0.37
+Average RMSE - Angle 3: 2.93 SD: 0.23
+Average RMSE - Angles 2 and 3: 2.88 SD: 0.31
+Average RMSE - Angular Distance: 6.14 SD: 0.52
+Average Correlation Coefficient (AngDist vs Time): 0.18 SD:0.18
+INFO:root:Movement Type: CON_SP
+INFO:root:Time interval: 0-120s
+INFO:root:Average Results: 
+(Decomp seq: yxz)
+Average RMSE - Angle 1: 2.79 SD: 1.13
+Average RMSE - Angle 2: 0.74 SD: 0.24
+Average RMSE - Angle 3: 0.77 SD: 0.17
+Average RMSE - Angles 2 and 3: 0.76 SD: 0.21
+Average RMSE - Angular Distance: 3.03 SD: 1.03
+Average Correlation Coefficient (AngDist vs Time): 0.19 SD:0.71
+INFO:root:Movement Type: Torso_FUN
+INFO:root:Time interval: 0-30s
+INFO:root:Average Results: 
+(Decomp seq: yxz)
+Average RMSE - Angle 1: 4.05 SD: 0.89
+Average RMSE - Angle 2: 1.03 SD: 0.29
+Average RMSE - Angle 3: 1.61 SD: 0.71
+Average RMSE - Angles 2 and 3: 1.32 SD: 0.61
+Average RMSE - Angular Distance: 4.53 SD: 0.95
+Average Correlation Coefficient (AngDist vs Time): -0.09 SD:0.44
+INFO:root:Movement Type: Upper_FUN
+INFO:root:Time interval: 0-30s
+INFO:root:Average Results: 
+(Decomp seq: yxz)
+Average RMSE - Angle 1: 6.29 SD: 2.03
+Average RMSE - Angle 2: 3.43 SD: 0.18
+Average RMSE - Angle 3: 3.48 SD: 0.11
+Average RMSE - Angles 2 and 3: 3.45 SD: 0.16
+Average RMSE - Angular Distance: 8.05 SD: 1.64
+Average Correlation Coefficient (AngDist vs Time): 0.06 SD:0.07
+INFO:root:Movement Type: Forearm_FUN
+INFO:root:Time interval: 0-30s
+INFO:root:Average Results: 
+(Decomp seq: yxz)
+Average RMSE - Angle 1: 5.27 SD: 1.12
+Average RMSE - Angle 2: 5.12 SD: 0.39
+Average RMSE - Angle 3: 3.35 SD: 0.34
+Average RMSE - Angles 2 and 3: 4.23 SD: 0.96
+Average RMSE - Angular Distance: 8.1 SD: 0.98
+Average Correlation Coefficient (AngDist vs Time): -0.05 SD:0.17
+INFO:root:RUNNING FILE: C:\Users\r03mm22\Documents\IMU Accuracy\Final Work - Code\Final Processing\Test Folder\main_d.py
+INFO:root:Movement Type: CON_MP
+INFO:root:Time interval: 0-30s
+INFO:root:Average Results: 
+(Decomp seq: yxz)
+Average RMSE - Angle 1: 4.57 SD: 0.54
+Average RMSE - Angle 2: 2.83 SD: 0.37
+Average RMSE - Angle 3: 2.93 SD: 0.23
+Average RMSE - Angles 2 and 3: 2.88 SD: 0.31
+Average RMSE - Angular Distance: 6.14 SD: 0.52
+Average Correlation Coefficient (AngDist vs Time): 0.18 SD:0.18
+INFO:root:Movement Type: CON_SP
+INFO:root:Time interval: 0-120s
+INFO:root:Average Results: 
+(Decomp seq: yxz)
+Average RMSE - Angle 1: 2.79 SD: 1.13
+Average RMSE - Angle 2: 0.74 SD: 0.24
+Average RMSE - Angle 3: 0.77 SD: 0.17
+Average RMSE - Angles 2 and 3: 0.76 SD: 0.21
+Average RMSE - Angular Distance: 3.03 SD: 1.03
+Average Correlation Coefficient (AngDist vs Time): 0.19 SD:0.71
+INFO:root:Movement Type: Torso_FUN
+INFO:root:Time interval: 0-30s
+INFO:root:Average Results: 
+(Decomp seq: yxz)
+Average RMSE - Angle 1: 4.05 SD: 0.89
+Average RMSE - Angle 2: 1.03 SD: 0.29
+Average RMSE - Angle 3: 1.61 SD: 0.71
+Average RMSE - Angles 2 and 3: 1.32 SD: 0.61
+Average RMSE - Angular Distance: 4.53 SD: 0.95
+Average Correlation Coefficient (AngDist vs Time): -0.09 SD:0.44
+INFO:root:Movement Type: Upper_FUN
+INFO:root:Time interval: 0-30s
+INFO:root:Average Results: 
+(Decomp seq: yxz)
+Average RMSE - Angle 1: 6.29 SD: 2.03
+Average RMSE - Angle 2: 3.43 SD: 0.18
+Average RMSE - Angle 3: 3.48 SD: 0.11
+Average RMSE - Angles 2 and 3: 3.45 SD: 0.16
+Average RMSE - Angular Distance: 8.05 SD: 1.64
+Average Correlation Coefficient (AngDist vs Time): 0.06 SD:0.07
+INFO:root:Movement Type: Forearm_FUN
+INFO:root:Time interval: 0-30s
+INFO:root:Average Results: 
+(Decomp seq: yxz)
+Average RMSE - Angle 1: 5.27 SD: 1.12
+Average RMSE - Angle 2: 5.12 SD: 0.39
+Average RMSE - Angle 3: 3.35 SD: 0.34
+Average RMSE - Angles 2 and 3: 4.23 SD: 0.96
+Average RMSE - Angular Distance: 8.1 SD: 0.98
+Average Correlation Coefficient (AngDist vs Time): -0.05 SD:0.17
+INFO:root:Movement Type: Torso_FUN
+INFO:root:Time interval: 0-300s
+INFO:root:Average Results: 
+(Decomp seq: yxz)
+Average RMSE - Angle 1: 3.0 SD: 0.75
+Average RMSE - Angle 2: 0.81 SD: 0.12
+Average RMSE - Angle 3: 1.11 SD: 0.18
+Average RMSE - Angles 2 and 3: 0.96 SD: 0.21
+Average RMSE - Angular Distance: 3.31 SD: 0.7
+Average Correlation Coefficient (AngDist vs Time): -0.27 SD:0.38
+INFO:root:Movement Type: Upper_FUN
+INFO:root:Time interval: 0-300s
+INFO:root:Average Results: 
+(Decomp seq: yxz)
+Average RMSE - Angle 1: 4.04 SD: 1.09
+Average RMSE - Angle 2: 2.97 SD: 0.21
+Average RMSE - Angle 3: 3.06 SD: 0.19
+Average RMSE - Angles 2 and 3: 3.02 SD: 0.21
+Average RMSE - Angular Distance: 5.93 SD: 0.82
+Average Correlation Coefficient (AngDist vs Time): -0.34 SD:0.18
+INFO:root:Movement Type: Forearm_FUN
+INFO:root:Time interval: 0-300s
+INFO:root:Average Results: 
+(Decomp seq: yxz)
+Average RMSE - Angle 1: 4.58 SD: 1.06
+Average RMSE - Angle 2: 4.35 SD: 0.36
+Average RMSE - Angle 3: 3.06 SD: 0.11
+Average RMSE - Angles 2 and 3: 3.71 SD: 0.7
+Average RMSE - Angular Distance: 7.04 SD: 0.92
+Average Correlation Coefficient (AngDist vs Time): -0.02 SD:0.15

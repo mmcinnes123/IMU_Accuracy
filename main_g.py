@@ -1,137 +1,99 @@
-# This script is used to analyse joint angles from FUN data
+# This script is used to analyse inter-IMU RMSE Range of Motion results from CON_HO and CON_VE data
 
 import logging
 from analysis import *
 
-sample_rate = 100
-logging.basicConfig(filename="Results_JointAngles.log", level=logging.INFO)
+logging.basicConfig(filename="Results_Inter_RoM.log", level=logging.INFO)
 logging.info("RUNNING FILE: " + str(__file__))
 
 
-def trim_data(input_file, start_time, end_time):
+
+def find_RMSD_RoM(file_name, tag, label, plot_peaks):
 
     # Read in the pre-processed data
-    IMU_df, OMC_df = read_abs_pre_processed_data_from_file(input_file)
+    IMU1_df, IMU2_df, IMU3_df, IMU4_df = read_inter_pre_processed_data_from_file(file_name)
 
-    # Trim the data based on start and end time
-    IMU_df = trim_df(IMU_df, start_time, end_time, sample_rate)
-    OMC_df = trim_df(OMC_df, start_time, end_time, sample_rate)
+    # Calculate Euler Angles
+    IMU1_eul_1, IMU1_eul_2, IMU1_eul_3 = eulers_from_quats(IMU1_df, int_decomp_seq)
+    IMU2_eul_1, IMU2_eul_2, IMU2_eul_3 = eulers_from_quats(IMU2_df, int_decomp_seq)
+    IMU3_eul_1, IMU3_eul_2, IMU3_eul_3 = eulers_from_quats(IMU3_df, int_decomp_seq)
+    IMU4_eul_1, IMU4_eul_2, IMU4_eul_3 = eulers_from_quats(IMU4_df, int_decomp_seq)
 
-    return IMU_df, OMC_df
+    if label == "CON_VE":
+        # Analyse rotation around horizontal axis: "Z" which is 2nd in decom seq
+        IMU1_eul = IMU1_eul_2
+        IMU2_eul = IMU2_eul_2
+        IMU3_eul = IMU3_eul_2
+        IMU4_eul = IMU4_eul_2
+        set_prominence = 10
+        set_height = (0, 40)
 
-def calculate_joint_angles(Torso_IMU_df, Torso_OMC_df, Upper_IMU_df, Upper_OMC_df, Forearm_IMU_df, Forearm_OMC_df):
+    elif label == "CON_HO":
+        # Analyse rotation around vertical axis: "Y" which is 1st in decom seq
+        IMU1_eul = -IMU1_eul_1
+        IMU2_eul = -IMU2_eul_1
+        IMU3_eul = -IMU3_eul_1
+        IMU4_eul = -IMU4_eul_1
+        set_prominence = 10
+        set_height = (100, 140)
 
+    # Find the RoMs of IMU and OMC
+    IMU1_RoMs, IMU2_RoMs, IMU3_RoMs, IMU4_RoMs = find_peaks_and_RoM_four_IMUs(IMU1_eul, IMU2_eul, IMU3_eul, IMU4_eul, tag, plot_peaks, set_prominence, set_height)
 
-    # Rotate the thorax LCF by 90deg around local y to align with ISB def
-    Torso_IMU_df = rotate_thorax(Torso_IMU_df)
-    Torso_OMC_df = rotate_thorax(Torso_OMC_df)
+    # Calculate the RMSD between the four IMUs for the RoM value at each peak
+    peak1_RoM = np.array([IMU1_RoMs[0,0], IMU2_RoMs[0,0], IMU3_RoMs[0,0], IMU4_RoMs[0,0]])
+    peak2_RoM = np.array([IMU1_RoMs[0,1], IMU2_RoMs[0,1], IMU3_RoMs[0,1], IMU4_RoMs[0,1]])
+    peak3_RoM = np.array([IMU1_RoMs[0,2], IMU2_RoMs[0,2], IMU3_RoMs[0,2], IMU4_RoMs[0,2]])
+    peak4_RoM = np.array([IMU1_RoMs[0,3], IMU2_RoMs[0,3], IMU3_RoMs[0,3], IMU4_RoMs[0,3]])
+    peak1_RoM_RMSD = (np.sum(np.square(peak1_RoM - np.mean(peak1_RoM)))/len(peak1_RoM))**0.5
+    peak2_RoM_RMSD = (np.sum(np.square(peak2_RoM - np.mean(peak2_RoM)))/len(peak2_RoM))**0.5
+    peak3_RoM_RMSD = (np.sum(np.square(peak3_RoM - np.mean(peak3_RoM)))/len(peak3_RoM))**0.5
+    peak4_RoM_RMSD = (np.sum(np.square(peak4_RoM - np.mean(peak4_RoM)))/len(peak4_RoM))**0.5
 
-    # Specify decomposition sequences
-    elbow_decomp_seq = "ZXY"
-    shoulder_decomp_seq = "YXY"
+    # Combine the peak RoM values into one array so that RMSD results can be averaged over all reps
+    peak_RMSDs = np.array([peak1_RoM_RMSD, peak2_RoM_RMSD, peak3_RoM_RMSD, peak4_RoM_RMSD])
+    average_RoM_RMSD = np.mean(peak_RMSDs)
 
-    # Calculate joint rotation quaternions
-    IMU_q_elbow = find_joint_rot_quat(Upper_IMU_df, Forearm_IMU_df)
-    OMC_q_elbow = find_joint_rot_quat(Upper_OMC_df, Forearm_OMC_df)
-    IMU_q_shoulder = find_joint_rot_quat(Torso_IMU_df, Upper_IMU_df)
-    OMC_q_shoulder = find_joint_rot_quat(Torso_OMC_df, Upper_OMC_df)
-
-    # Calculate 3 euler angles
-    IMU_elbow_angle1, IMU_elbow_angle2, IMU_elbow_angle3 = eulers_from_quats(IMU_q_elbow, elbow_decomp_seq)
-    OMC_elbow_angle1, OMC_elbow_angle2, OMC_elbow_angle3 = eulers_from_quats(OMC_q_elbow, elbow_decomp_seq)
-    IMU_shoulder_angle1, IMU_shoulder_angle2, IMU_shoulder_angle3 = eulers_from_quats(IMU_q_shoulder, shoulder_decomp_seq)
-    OMC_shoulder_angle1, OMC_shoulder_angle2, OMC_shoulder_angle3 = eulers_from_quats(OMC_q_shoulder, shoulder_decomp_seq)
-
-    # Applying the following corrections allows the angles to be expressed in same convention as Pearl paper
-    IMU_shoulder_angle1 = adjust_angles_by_180(IMU_shoulder_angle1)
-    OMC_shoulder_angle1 = adjust_angles_by_180(OMC_shoulder_angle1)
-    IMU_shoulder_angle3 = adjust_angles_by_180(IMU_shoulder_angle3)
-    OMC_shoulder_angle3 = adjust_angles_by_180(OMC_shoulder_angle3)
-
-    return IMU_elbow_angle1, IMU_elbow_angle2, IMU_elbow_angle3, OMC_elbow_angle1, OMC_elbow_angle2, OMC_elbow_angle3, \
-        IMU_shoulder_angle1, IMU_shoulder_angle2, IMU_shoulder_angle3, OMC_shoulder_angle1, OMC_shoulder_angle2, OMC_shoulder_angle3
-
-
-def find_joint_angle_error(IMU_elbow_angle1, IMU_elbow_angle2, IMU_elbow_angle3, OMC_elbow_angle1, OMC_elbow_angle2, OMC_elbow_angle3, \
-            IMU_shoulder_angle1, IMU_shoulder_angle2, IMU_shoulder_angle3, OMC_shoulder_angle1, OMC_shoulder_angle2, OMC_shoulder_angle3):
-
-    RMSE_elbow_angle_1 = find_euler_error(IMU_elbow_angle1, OMC_elbow_angle1)
-    RMSE_elbow_angle_2 = find_euler_error(IMU_elbow_angle2, OMC_elbow_angle2)
-    RMSE_elbow_angle_3 = find_euler_error(IMU_elbow_angle3, OMC_elbow_angle3)
-
-    RMSE_shoulder_angle_1 = find_euler_error(IMU_shoulder_angle1, OMC_shoulder_angle1)
-    RMSE_shoulder_angle_2 = find_euler_error(IMU_shoulder_angle2, OMC_shoulder_angle2)
-    RMSE_shoulder_angle_3 = find_euler_error(IMU_shoulder_angle3, OMC_shoulder_angle3)
-
-    return RMSE_elbow_angle_1, RMSE_elbow_angle_2, RMSE_elbow_angle_3, RMSE_shoulder_angle_1, RMSE_shoulder_angle_2, RMSE_shoulder_angle_3
+    return average_RoM_RMSD
 
 
 
-def combine_reps(label):
+def combine_reps_RoM(label, plot_peaks):
 
     # Initiate arrays to hold a single value for each rep
-    elbow_angle_1_RMSEs = np.zeros((no_reps))
-    elbow_angle_2_RMSEs = np.zeros((no_reps))
-    elbow_angle_3_RMSEs = np.zeros((no_reps))
-    shoulder_angle_1_RMSEs = np.zeros((no_reps))
-    shoulder_angle_2_RMSEs = np.zeros((no_reps))
-    shoulder_angle_3_RMSEs = np.zeros((no_reps))
+    RoM_RMSDs = np.zeros((no_reps))
 
     for i in range(1, no_reps + 1):
 
-        torso_file_name = "JA_Torso_FUN_R" + str(i) + ".csv"
-        upper_file_name = "JA_Upper_FUN_R" + str(i) + ".csv"
-        forearm_file_name = "JA_Forearm_FUN_R" + str(i) + ".csv"
+        file_name = "Inter_" + label + "_R" + str(i) + ".csv"
         tag = label + "_R" + str(i)
 
-        Torso_IMU_df, Torso_OMC_df = trim_data(torso_file_name, start_time, end_time)
-        Upper_IMU_df, Upper_OMC_df = trim_data(upper_file_name, start_time, end_time)
-        Forearm_IMU_df, Forearm_OMC_df = trim_data(forearm_file_name, start_time, end_time)
+        # Find RoM from euler angles
+        RMSD_RoM = find_RMSD_RoM(file_name, tag, label, plot_peaks=plot_peaks)
 
-        # Calculate the joint angles
-        IMU_elbow_angle1, IMU_elbow_angle2, IMU_elbow_angle3, OMC_elbow_angle1, OMC_elbow_angle2, OMC_elbow_angle3, \
-            IMU_shoulder_angle1, IMU_shoulder_angle2, IMU_shoulder_angle3, OMC_shoulder_angle1, OMC_shoulder_angle2, OMC_shoulder_angle3 \
-            = calculate_joint_angles(Torso_IMU_df, Torso_OMC_df, Upper_IMU_df, Upper_OMC_df, Forearm_IMU_df, Forearm_OMC_df)
+        # Add the value from each rep to the arrays
+        RoM_RMSDs[i - 1] = RMSD_RoM
 
-        # Find the joint angle RMSEs
-        RMSE_elbow_angle_1, RMSE_elbow_angle_2, RMSE_elbow_angle_3, RMSE_shoulder_angle_1, RMSE_shoulder_angle_2, RMSE_shoulder_angle_3 = \
-            find_joint_angle_error(IMU_elbow_angle1, IMU_elbow_angle2, IMU_elbow_angle3, OMC_elbow_angle1, OMC_elbow_angle2, OMC_elbow_angle3, \
-            IMU_shoulder_angle1, IMU_shoulder_angle2, IMU_shoulder_angle3, OMC_shoulder_angle1, OMC_shoulder_angle2, OMC_shoulder_angle3)
-
-        elbow_angle_1_RMSEs[i - 1] = RMSE_elbow_angle_1
-        elbow_angle_2_RMSEs[i - 1] = RMSE_elbow_angle_2
-        elbow_angle_3_RMSEs[i - 1] = RMSE_elbow_angle_3
-        shoulder_angle_1_RMSEs[i - 1] = RMSE_shoulder_angle_1
-        shoulder_angle_2_RMSEs[i - 1] = RMSE_shoulder_angle_2
-        shoulder_angle_3_RMSEs[i - 1] = RMSE_shoulder_angle_3
-
-    elbow_angle_1_RMSD_average = np.mean(elbow_angle_1_RMSEs)
-    elbow_angle_1_RMSD_SD = np.std(elbow_angle_1_RMSEs)
-    elbow_angle_2_RMSD_average = np.mean(elbow_angle_2_RMSEs)
-    elbow_angle_2_RMSD_SD = np.std(elbow_angle_2_RMSEs)
-    elbow_angle_3_RMSD_average = np.mean(elbow_angle_3_RMSEs)
-    elbow_angle_3_RMSD_SD = np.std(elbow_angle_3_RMSEs)
-    shoulder_angle_1_RMSD_average = np.mean(shoulder_angle_1_RMSEs)
-    shoulder_angle_1_RMSD_SD = np.std(shoulder_angle_1_RMSEs)
-    shoulder_angle_2_RMSD_average = np.mean(shoulder_angle_2_RMSEs)
-    shoulder_angle_2_RMSD_SD = np.std(shoulder_angle_2_RMSEs)
-    shoulder_angle_3_RMSD_average = np.mean(shoulder_angle_3_RMSEs)
-    shoulder_angle_3_RMSD_SD = np.std(shoulder_angle_3_RMSEs)
+    RoM_RMSD_average = np.mean(RoM_RMSDs)
+    RoM_RMSD_SD = np.std(RoM_RMSDs)
 
     logging.info("Movement Type: " + label)
-    logging.info("Average ELBOW Results: \n"
-                 "Average RMSE - Angle 1: " + str(np.round(elbow_angle_1_RMSD_average, 2)) + " SD: " + str(np.round(elbow_angle_1_RMSD_SD, 2))+ "\n"
-                 "Average RMSE - Angle 2: " + str(np.round(elbow_angle_2_RMSD_average, 2)) + " SD: " + str(np.round(elbow_angle_2_RMSD_SD, 2))+ "\n"
-                 "Average RMSE - Angle 3: " + str(np.round(elbow_angle_3_RMSD_average, 2)) + " SD: " + str(np.round(elbow_angle_3_RMSD_SD, 2)))
-    logging.info("Average SHOULDER Results: \n"
-                 "Average RMSE - Angle 1: " + str(np.round(shoulder_angle_1_RMSD_average, 2)) + " SD: " + str(np.round(shoulder_angle_1_RMSD_SD, 2))+ "\n"
-                 "Average RMSE - Angle 2: " + str(np.round(shoulder_angle_2_RMSD_average, 2)) + " SD: " + str(np.round(shoulder_angle_2_RMSD_SD, 2))+ "\n"
-                 "Average RMSE - Angle 3: " + str(np.round(shoulder_angle_3_RMSD_average, 2)) + " SD: " + str(np.round(shoulder_angle_3_RMSD_SD, 2)))
+    logging.info("\n" +
+                 "Average RoM RMSD: " + str(np.around(RoM_RMSD_average, 2)) + "\n" +
+                 "Average RoM SD: " + str(np.around(RoM_RMSD_SD, 2)))
 
 
-### APPLY FUNCTIONS DEFINED ABOVE TO FIND JOINT ANGLE RMSE FOR ALL REPS
+
+### APPLY FUNCTIONS DEFINED ABOVE TO FIND AVERAGE RMSE FOR ALL REPS
 
 start_time = 0
-end_time = 30
+end_time = 32
 no_reps = 5
-combine_reps("FUN")
+int_decomp_seq = "YZX"  # Intrinsic decomposition seq - used for plotting euler angles
+logging.info("Int Decomp Sequence: " + int_decomp_seq)
+plot_peaks = False
+
+combine_reps_RoM("CON_HO", plot_peaks=plot_peaks)
+combine_reps_RoM("CON_VE", plot_peaks=plot_peaks)
+
+
