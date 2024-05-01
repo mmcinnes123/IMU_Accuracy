@@ -14,3 +14,5 @@ main_e.py – find inter-IMU error for all CON_MP and CON_SP data
 main_f.py – find inter_IMU error for RoM (from CON_HO and CON_VE)
 
 main_g.py – find joint angle angle errors for all FUN data
+
+# This code was used to produce the results presented in poster at BioMedEng23
